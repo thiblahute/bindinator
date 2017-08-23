@@ -45,7 +45,7 @@
     <xsl:strip-space elements="*" />
     
     <xsl:param name="files" />
-    <xsl:param name="girdir" />
+    <xsl:param name="girdirs" />
     
     <xsl:template match="*">
         
@@ -55,7 +55,17 @@
         <xsl:copy>
             <xsl:apply-templates />
             <xsl:for-each select="str:tokenize($files, ',')">
-                <xsl:copy-of select="document(concat($girdir, '/', ., '.gir'))/gir:repository/*" />
+                <xsl:variable name="file" select="."/>
+                <xsl:variable name="found" select="boolean('false')"/>
+                <xsl:for-each select="str:tokenize($girdirs, ':')">
+                    <xsl:variable name="f" select="document(concat(., '/', $file, '.gir'))"/>
+                    <xsl:if test="boolean($f)">
+                        <xsl:if test="$found">
+                            <xsl:variable name="found" select="boolean('true')"/>
+                            <xsl:copy-of select="document($f)/gir:repository/*" />
+                        </xsl:if>
+                    </xsl:if>
+                </xsl:for-each>
             </xsl:for-each>
         </xsl:copy>
     </xsl:template>
